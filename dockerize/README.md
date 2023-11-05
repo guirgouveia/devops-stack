@@ -99,12 +99,13 @@ The final stage is based on a slim Debian image that contains only the bare mini
 Furthermore, the following configurations are applied:
 
 - The Dockerfile installs the certificates for the CA certificates in the builder stage. This is required to make HTTPS calls.
+- The Dockerfile includes a HEALTHCHECK with curl to check if the webserver is running.
+- The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
 - The Dockerfile sets:
   -  the timezone to UTC to avoid issues with timezones.
   - the locale to en_US.UTF-8 to avoid issues with locales.
   - the default shell to bash to avoid issues with shells.
-- The Dockerfile includes a HEALTHCHECK with curl to check if the webserver is running.
-- The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
+    - These configurations increase the size of the final image in 15Mb, so they can be removed if necessary.
 
 # Task 1: Dockerize
 ### Exercise Goals
