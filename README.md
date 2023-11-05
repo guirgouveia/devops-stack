@@ -75,6 +75,14 @@ The __build__ flag is used to build a new Docker image for the __stack-io__ app 
 
 Now, you can access the webserver at `http://localhost:8081`, because the docker-compose file maps port 8080 inside the Docker container to port 8081 on your local machine to avoid conflicts with services running on port 8080.
 
+The __docker-compose.yaml__ uses environment variables from the __.env__ to pass the necessary configurations to the app, such as the database credentials and the database name.
+
+The image can also be pushed to a Docker registry, such as Docker Hub, to be used by the Kubernetes cluster in the next task, with:
+
+```
+docker-compose push
+```
+
 ### About the Docker Image
 
 A Multi-stage build is used to create a small Docker image. The Dockerfile contains two stages:

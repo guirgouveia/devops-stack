@@ -1,4 +1,16 @@
+
 # Task 1: Dockerize
+
+# MySQL Server
+
+The app requires a MySQL Server to connect, so a directory containing the [Kubernetes templates](./kubernetes/mysql) to deploy the MySQL Server used by the app is provided for your convenience.
+
+Alternatively, you can use the `docker-compose.yaml` file in the `dockerize` directory that contains all the services and configurations required for the app to run. This includes the MySQL server and the necessary environment variables and also creates a new _stack-io__ user and database for the app to connect to. It includes a [__mysql-init.sql__](./dockerize/mysql-init.sql) file to grant the necessary privileges to the user.
+
+Furthermore, a [__server.confi__](./dockerize/server.confi) file to instruct the app to connect to the database was missing in the original files, so one was provided for the app to work. It connects to the __stack-io__ database created within the Docker Compose file with the specified credentials.
+
+Additionally, the Docker Compose file also creates a volume to persist the data in the MySQL server and a volume to persist the logs in the app, as well as makes use of Dockerfile ARGs and ENVs instructions to demonstrate how to pass the necessary environment variables to the app.
+
 
 ## Dockerized Go Webserver
 
@@ -55,6 +67,14 @@ The __build__ flag is used to build a new Docker image for the __stack-io__ app 
 
 Now, you can access the webserver at `http://localhost:8081`, because the docker-compose file maps port 8080 inside the Docker container to port 8081 on your local machine to avoid conflicts with services running on port 8080.
 
+The __docker-compose.yaml__ uses environment variables from the __.env__ to pass the necessary configurations to the app, such as the database credentials and the database name.
+
+The image can also be pushed to a Docker registry, such as Docker Hub, to be used by the Kubernetes cluster in the next task, with:
+
+```
+docker-compose push
+```
+
 ### About the Docker Image
 
 A Multi-stage build is used to create a small Docker image. The Dockerfile contains two stages:
@@ -67,6 +87,7 @@ Furthermore, the following configurations are applied:
 
 - The Dockerfile installs the certificates for the CA certificates in the builder stage. This is required to make HTTPS calls.
 - The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
+
 
 # Task 1: Dockerize
 ### Exercise Goals
