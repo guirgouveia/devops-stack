@@ -8,6 +8,9 @@ Welcome to our `Take Home Assingment`. We are going to provide you with a sequen
 * [Task 3](terraform): Create a terraform module
 * [Task 4](linux): Write down a shell script for further automation
 
+# Task 1: Dockerize
+
+
 # MySQL Server
 
 The app requires a MySQL Server to connect, so a directory containing the [Kubernetes templates](./kubernetes/mysql) to deploy the MySQL Server used by the app is provided for your convenience.
@@ -18,7 +21,6 @@ Furthermore, a [__server.confi__](./dockerize/server.confi) file to instruct the
 
 Additionally, the Docker Compose file also creates a volume to persist the data in the MySQL server and a volume to persist the logs in the app, as well as makes use of Dockerfile ARGs and ENVs instructions to demonstrate how to pass the necessary environment variables to the app.
 
-# Task 1: Dockerize
 
 ## Dockerized Go Webserver
 
@@ -95,3 +97,4 @@ Furthermore, the following configurations are applied:
 
 - The Dockerfile installs the certificates for the CA certificates in the builder stage. This is required to make HTTPS calls.
 - The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
+
