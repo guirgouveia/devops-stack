@@ -39,7 +39,6 @@ func main() {
 	http.HandleFunc("/health", HealthCheck)
 	http.HandleFunc("/ready", ReadinessCheck)
 	http.HandleFunc("/articles/", articlehandler.ReturnArticle)
-	http.HandleFunc("/articles/", articlehandler.ReturnArticle)
 	http.HandleFunc("/index.html", articlehandler.ReturnHomePage)
 	http.HandleFunc("/api/articles", articlehandler.ReturnArticlesForHomePage)
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -69,10 +69,10 @@ Now, you can access the webserver at `http://localhost:8081`, because the docker
 
 The *($1)* to pass the necessary configurations to the app, such as the database credentials and the database name.
 
-The image can also be pushed to a Docker registry, such as Docker Hub, to be used by the Kubernetes cluster in the next task, with:
+The image can also be built and pushed to a Docker registry, such as Docker Hub, to be used by the Kubernetes cluster in the next task, with:
 
 ```
-docker-compose push
+docker-compose build --push
 ```
 
 ### About the Docker Image

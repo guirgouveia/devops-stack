@@ -35,7 +35,7 @@ RUN go build -v -o main
 # to be published as an artifact to the next stage
 RUN mkdir -p /tmp/output && \
     cp $APP_HOME/main /tmp/output && \
-    cp $APP_HOME/server.confi /tmp/output && \
+    cp $APP_HOME/config/server.confi /tmp/output && \
     cp -r $APP_HOME/src /tmp/output/src
 
 # Creates the final stage from the official Debian slim image
@@ -56,8 +56,6 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 
 # Copies only the necessary files from the previous stage
 COPY --from=builder /tmp/output/ ./
-
-RUN mv server.confi /etc/server.confi
 
 # Exposes port 8080
 EXPOSE "$HTTP_PORT"
