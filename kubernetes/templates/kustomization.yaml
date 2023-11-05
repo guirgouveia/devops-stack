@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- namespace.yaml
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+
+secretGenerator:
+- name: stack-io
+  files:
+  - ./config/server.confi
+
+configMapGenerator:
+- name: stack-io
+  files:
+  - ./config/hooks/pre-stop-hook.sh
+  - ./config/hooks/post-start-hook.sh
