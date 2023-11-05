@@ -3,14 +3,15 @@
 
 # MySQL Server
 
-The app requires a MySQL Server to connect, so a directory containing the [Kubernetes templates](./kubernetes/mysql) to deploy the MySQL Server used by the app is provided for your convenience.
+The app requires a MySQL Server running, so use the provided [Kubernetes templates](./kubernetes/mysql) or the `docker-compose.yaml` file in the `dockerize` directory, which sets up necessary services, environment variables, and user privileges.
 
-Alternatively, you can use the `docker-compose.yaml` file in the `dockerize` directory that contains all the services and configurations required for the app to run. This includes the MySQL server and the necessary environment variables and also creates a new _stack-io*($1)*](./dockerize/mysql-init.sql) file to grant the necessary privileges to the user.
+An initial *blog* database is created for storing blog posts, but it's empty as no content is provided by the assigner. 
 
-Furthermore, a [*($1)* database created within the Docker Compose file with the specified credentials.
+The Docker Compose file also sets up volumes for data and log persistence, and demonstrates passing environment variables using Dockerfile ARGs and ENVs instructions.
 
-Additionally, the Docker Compose file also creates a volume to persist the data in the MySQL server and a volume to persist the logs in the app, as well as makes use of Dockerfile ARGs and ENVs instructions to demonstrate how to pass the necessary environment variables to the app.
+# Additional Packages
 
+A [Kubernetes Handler Golang package](./webserver/kuberneteshandler/) was created to handle Kubernetes events, such as the ones triggered by the Kubernetes liveness, readiness probes and the lifecycle hooks.
 
 ## Dockerized Go Webserver
 
@@ -74,6 +75,18 @@ The image can also be built and pushed to a Docker registry, such as Docker Hub,
 ```
 docker-compose build --push
 ```
+
+### Using Skaffold for Development
+
+To use Skaffold for development, make sure to install [Skaffold](https://skaffold.dev/docs/install/) and [kubectl 1.14 or higher](https://kubernetes.io/docs/tasks/tools/install-kubectl/) first.
+
+Then, run the following command to create the pipeline that will do the local CI/CD:
+
+    ```bash
+    skaffold dev
+    ```
+
+This will create a pipeline that will watch for changes in the source code, as well as in the Kubernetes manifests, and continuously build and push the image to the remote registry, and deploy the app to the specified Kubernetes cluster.
 
 ### About the Docker Image
 

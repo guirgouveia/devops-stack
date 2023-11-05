@@ -34,9 +34,9 @@ services:
       MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
       MYSQL_DATABASE: "${MYSQL_DATABASE}"
     volumes:
-      - mysql_data:/var/lib/mysql 
+      - mysql_data:/var/lib/mysql
+      - mysql_logs:/var/log/mysql
       - ./config/mysql-init.sh:/docker-entrypoint-initdb.d/mysql-init.sh # Grants the stack-io user privileged permissions
-
 
   adminer:
     container_name: stack-io-adminer

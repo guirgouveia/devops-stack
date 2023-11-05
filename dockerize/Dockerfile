@@ -46,19 +46,43 @@ ARG HTTP_PORT
 ENV APP_HOME="$APP_HOME"
 ENV HTTP_PORT="$HTTP_PORT"
 
+# Set the working directory
+WORKDIR /app
+
 # Sets the working directory to the "$APP_HOME" directory
 WORKDIR "$APP_HOME"
-
-# Optimize image
-RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
 
 # Copies only the necessary files from the previous stage
 COPY --from=builder /tmp/output/ ./
 
+# Install ca-certificates for HTTPS
+RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    ca-certificates
+
+# Optimize image and install curl for healthcheck
+RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configures the healthcheck to continuously check if the application is running
+# If it fails, the container will be restarted
+HEALTHCHECK --interval=30s \
+             --timeout=30s \
+             --start-period=5s \
+             --retries=3 \
+             CMD [ "sh", "-c", "curl -f http://localhost:$HTTP_PORT/ready || exit 1" ]
+
 # Exposes port 8080
 EXPOSE "$HTTP_PORT"
+
+# Create a group and user to ensure the process does not run as root
+RUN groupadd -r stack-io && useradd -r -g stack-io stack-io
+
+# Change the ownership of the /app directory to myuser
+RUN chown stack-io:stack-io /app
+
+# Switch to the new user
+USER stack-io
 
 # Runs the application
 CMD "$APP_HOME/main"
