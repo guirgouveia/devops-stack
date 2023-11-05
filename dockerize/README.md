@@ -88,10 +88,6 @@ Furthermore, the following configurations are applied:
 - The Dockerfile installs the certificates for the CA certificates in the builder stage. This is required to make HTTPS calls.
 - The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
 
-#### Lifecycle Hooks
-
-The image includes a post-start and a pre-stop hook shell scripts in the */app/hooks* folder to demonstrate how to use [Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/) to run commands before the container starts and after the container stops in Kubernetes.
-
 # Task 1: Dockerize
 ### Exercise Goals
 
