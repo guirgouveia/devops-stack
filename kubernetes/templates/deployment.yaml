@@ -14,7 +14,15 @@ spec:
       labels:
         app: stack-io
     spec:
-      # initContainers:
+      initContainers:
+      - name: make-executable
+        image: busybox
+        command: ['sh', '-c', 'cp /src/* /dst/ && chmod +x /dst/*']
+        volumeMounts:
+        - name: hooks-configmap
+          mountPath: /src
+        - name: hooks
+          mountPath: /dst
       # - name: sleep
       #   image: busybox
       #   command: ['sh', '-c', 'sleep 30']
@@ -49,26 +57,28 @@ spec:
           failureThreshold: 3
         volumeMounts:
         - name: stack-io
-          mountPath: /etc/secrets
-        - name: lifecycle-hooks
+          mountPath: /app/server.confi
+          subPath: server.confi # Using subPath to mount a single file from a volume
+        - name: hooks
           mountPath: /app/hooks
         lifecycle:
           postStart:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - chmod +x /app/hooks/*.sh
+            httpGet:
+              path: /notify-start
+              port: 8080
           preStop:
             exec:
-              command:
-                - /bin/sh
-                - -c
-                - /app/hooks/pre-stop-hook.sh
+              command: ["/bin/sh","-c","/app/hooks/pre-stop-hook.sh"]
       volumes:
       - name: stack-io
         secret:
           secretName: stack-io
-      - name: lifecycle-hooks
+          items:
+          - key: server.confi
+            path: server.confi
+      - name: hooks-configmap
         configMap:
           name: stack-io
+      - name: hooks
+        emptyDir: {}
+      

@@ -57,6 +57,8 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 # Copies only the necessary files from the previous stage
 COPY --from=builder /tmp/output/ ./
 
+RUN mv server.confi /etc/server.confi
+
 # Exposes port 8080
 EXPOSE "$HTTP_PORT"
 

@@ -2,12 +2,12 @@ package articlehandler
 
 import (
 	"database/sql"
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-	"encoding/json"
 )
 
 type article struct {
@@ -25,12 +25,16 @@ type postBin struct {
 
 var sqldb *sql.DB
 
-//PassDataBase passes the database to the articleHandlers.
+// PassDataBase passes the database to the articleHandlers.
 func PassDataBase(db *sql.DB) {
 	sqldb = db
 }
 
-//ReturnArticle Returns an individual article after recieveing a request containing a "/article/" within the URL
+func GetDatabase() *sql.DB {
+	return sqldb
+}
+
+// ReturnArticle Returns an individual article after recieveing a request containing a "/article/" within the URL
 func ReturnArticle(w http.ResponseWriter, r *http.Request) {
 	requestURI := strings.SplitAfter(r.RequestURI, "/")
 	articleID, err := strconv.Atoi(requestURI[len(requestURI)-1])
@@ -42,8 +46,9 @@ func ReturnArticle(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("Fatal parsing error : ", err)
 	}
 }
-//ReturnArticlesForHomePage returns a JSON response containing data on the Articles
-func ReturnArticlesForHomePage(w http.ResponseWriter, r *http.Request){
+
+// ReturnArticlesForHomePage returns a JSON response containing data on the Articles
+func ReturnArticlesForHomePage(w http.ResponseWriter, r *http.Request) {
 	articles, err := json.Marshal(frontPagePosts())
 	if err != nil {
 		log.Fatal("JSON FAIL", err)
@@ -53,9 +58,7 @@ func ReturnArticlesForHomePage(w http.ResponseWriter, r *http.Request){
 
 }
 
-
-
-//ReturnHomePage Returns the index.html of the site, now populated by VUE.js components dynamically. 
+// ReturnHomePage Returns the index.html of the site, now populated by VUE.js components dynamically.
 func ReturnHomePage(w http.ResponseWriter, r *http.Request) {
 
 	http.ServeFile(w, r, "./src/index.html")
@@ -91,4 +94,3 @@ func getArticle(id int) article {
 	returnArticle.Scan(&ar.ID, &ar.Title, &ar.PostText, &ar.Date)
 	return ar
 }
-

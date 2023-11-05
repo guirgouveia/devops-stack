@@ -35,10 +35,32 @@ func init() {
 
 func main() {
 	http.Handle("/", http.FileServer(http.Dir("./src")))
+	http.Handle("/notify", http.FileServer(http.Dir("./src")))
+	http.HandleFunc("/health", HealthCheck)
+	http.HandleFunc("/ready", ReadinessCheck)
+	http.HandleFunc("/articles/", articlehandler.ReturnArticle)
 	http.HandleFunc("/articles/", articlehandler.ReturnArticle)
 	http.HandleFunc("/index.html", articlehandler.ReturnHomePage)
 	http.HandleFunc("/api/articles", articlehandler.ReturnArticlesForHomePage)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func ReadinessCheck(w http.ResponseWriter, r *http.Request) {
+	err := articlehandler.GetDatabase()
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "Database connection failed")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Application ready")
 }
 
 func readConfig(s string) string {

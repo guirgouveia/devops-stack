@@ -2,12 +2,11 @@
 
 set -e
 
-echo "User $(whoami) is running post-start-hook.sh"
+printf "User %s is running post-start-hook.sh" "$(whoami)"
 
-echo "User $(whoami) is copying server.confi"
-cp /etc/secrets/server.confi /app/server.confi
+cp /etc/secrets/server.confi /app/server.confi >> /dev/null 2>&1
 
 if [ $? -ne 0 ]; then
-    echo "User $(whoami) Failed to copy server.confi"
+    printf "User %s is running post-start-hook.sh" "$(whoami)"
     exit 1
 fi
