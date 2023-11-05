@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+secretGenerator:
+- name: mysql-db-secret
+  envs:
+  - ./config/server.confi
+
+configMapGenerator:
+- name: mysql-db-hooks-configmap
+  files:
+  - ./config/hooks/pre-stop-hook.sh
+  - ./config/hooks/post-start-hook.sh
+- name: mysql-init-configmap
+  files:
+  - ./config/mysql-init.sh
+
+configurations:
+  - kustomizeconfig.yaml

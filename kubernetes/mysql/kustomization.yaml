@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: mysql
+
+resources:
+  - manifests/namespace.yaml
+  - manifests/pv.yaml
+  - manifests/deployment.yaml
+  - manifests/service.yaml
+
+secretGenerator:
+- name: mysql-secret
+  envs:
+  - ./config/.env.secret
+
+configMapGenerator:
+- name: mysql-init-configmap
+  files:
+  - ./config/mysql-init.sh
+
+configurations:
+  - kustomizeconfig.yaml
+
+generatorOptions:
+  disableNameSuffixHash: false

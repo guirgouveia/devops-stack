@@ -6,25 +6,25 @@ This document provides instructions on how to use the Kubernetes configuration f
 
 ## Resources
 
-The templates contain the following Kubernetes resources:
+The manifests contain the following Kubernetes resources:
 
-- [Namespace](./templates/namespace.yaml): The namespace where the application will be deployed.
-- [Deployment](./templates/deployment.yaml): The deployment of the application.
-- [Service](./templates/service.yaml): The service that exposes the application.
-- [Ingress](./templates/ingress.yaml): The ingress that exposes the application to the outside world.
-- [Secret](./templates/secret.yaml): The secret of the application.
-- [ConfigMap](./templates/configmap.yaml): The configuration of the application.
-- [PersistentVolumeClaim](./templates/persistentvolumeclaim.yaml): The persistent volume claim of the application.
-- [Job](./templates/job.yaml): The job that runs the database migrations.
-- [CronJob](./templates/cronjob.yaml): The cron job that runs the database backups.
-- [HorizontalPodAutoscaler](./templates/horizontalpodautoscaler.yaml): The horizontal pod autoscaler that scales the application based on CPU usage.
-- [PodDisruptionBudget](./templates/poddisruptionbudget.yaml): The pod disruption budget that ensures that at least one pod is available at all times.
-- [NetworkPolicy](./templates/networkpolicy.yaml): The network policy that restricts access to the application.
-- [PodSecurityPolicy](./templates/podsecuritypolicy.yaml): The pod security policy that restricts the privileges of the application.
-- [Role](./templates/role.yaml): The role that defines the permissions of the application.
-- [RoleBinding](./templates/rolebinding.yaml): The role binding that binds the role to the service account.
-- [ServiceAccount](./templates/serviceaccount.yaml): The service account that is used by the application.
-- [PodSecurityPolicy](./templates/podsecuritypolicy.yaml): The pod security policy that restricts the privileges of the application.
+- [Namespace](./manifests/namespace.yaml): The namespace where the application will be deployed.
+- [Deployment](./manifests/deployment.yaml): The deployment of the application.
+- [Service](./manifests/service.yaml): The service that exposes the application.
+- [Ingress](./manifests/ingress.yaml): The ingress that exposes the application to the outside world.
+- [Secret](./manifests/secret.yaml): The secret of the application.
+- [ConfigMap](./manifests/configmap.yaml): The configuration of the application.
+- [PersistentVolumeClaim](./manifests/persistentvolumeclaim.yaml): The persistent volume claim of the application.
+- [Job](./manifests/job.yaml): The job that runs the database migrations.
+- [CronJob](./manifests/cronjob.yaml): The cron job that runs the database backups.
+- [HorizontalPodAutoscaler](./manifests/horizontalpodautoscaler.yaml): The horizontal pod autoscaler that scales the application based on CPU usage.
+- [PodDisruptionBudget](./manifests/poddisruptionbudget.yaml): The pod disruption budget that ensures that at least one pod is available at all times.
+- [NetworkPolicy](./manifests/networkpolicy.yaml): The network policy that restricts access to the application.
+- [PodSecurityPolicy](./manifests/podsecuritypolicy.yaml): The pod security policy that restricts the privileges of the application.
+- [Role](./manifests/role.yaml): The role that defines the permissions of the application.
+- [RoleBinding](./manifests/rolebinding.yaml): The role binding that binds the role to the service account.
+- [ServiceAccount](./manifests/serviceaccount.yaml): The service account that is used by the application.
+- [PodSecurityPolicy](./manifests/podsecuritypolicy.yaml): The pod security policy that restricts the privileges of the application.
 
 The Deployment uses the Docker image built in the previous step and includes a [readiness/liveness probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/), a [pre-stop hook](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/), and an [init container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) that sleeps for 30 seconds before the application starts, to ensure that the MySQL database is ready before the application starts.
 
@@ -36,7 +36,7 @@ For the liveness probe, the application is considered healthy if it returns a 20
 
 ## Lifecycle Hooks
 
-Simply to illustrate how to use [Kustomize's Secret Generator](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/) along with [Volume Mounts](https://kubernetes.io/docs/concepts/storage/volumes/) and [Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/), the [Lifecycle Hooks](./templates/config/hooks) folder contains the hooks that will be used by Kustomize ConfigMap and Secret Generator to generate the ConfigMap and Secret that will be mounted as a Volume in the Deployment. 
+Simply to illustrate how to use [Kustomize's Secret Generator](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/) along with [Volume Mounts](https://kubernetes.io/docs/concepts/storage/volumes/) and [Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/), the [Lifecycle Hooks](./manifests/config/hooks) folder contains the hooks that will be used by Kustomize ConfigMap and Secret Generator to generate the ConfigMap and Secret that will be mounted as a Volume in the Deployment. 
 
 The hooks are:
 
@@ -44,37 +44,84 @@ The hooks are:
 - **Pre-Stop hook**: used to gracefully shutdown the application when the pod is terminated. The application is considered ready to be terminated if it returns a 200 status code in the `/health` endpoint.
 
 ## Getting Started
+
 The instructions below provide a step-by-step guide for setting up the application in a local Kubernetes cluster.
+
+Both Helm Charts and Kubernetes Manifests are declared to deploy the application. The Helm Charts are located in the [helm](./helm) folder and the Kubernetes Manifests are located in the [manifests](./manifests) folder for each app of the stack.
 
 ## Prerequisites
 
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [MySQL Server](https://artifacthub.io/packages/helm/bitnami/mysql)
 
 ## Instructions
 
 1. **Start Minikube**: Start your local Minikube cluster by running the command `minikube start`.
 
-2. **Deploy the templates**: Deploy all the files in the [.kubernetes](./templates) folder with [kubectl kustomize](https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/) to deploy the whole stack in your cluster from the kubernetes folder with the following command:
+2. **Deploy MySQL Server**: Deploy Bitnami's MySQL Server OCI Helm Charts in your cluster with the following command:
 
     ```bash
-    kubectl apply -k templates
+    helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml --create-namespaces -n mysql
+    ```
+    or deploy it with `kubectl kustomize` running:
+      
+    ```bash
+    kubectl apply -k mysql
+    ```
+The OCi registries dispenses the need of adding the helm repository to your local machine and instead downloads the chart directly from the registry. 
+
+The `mysql-values.yaml` file contains the values that will be used to configure the MySQL Server.
+
+1. **Deploy the manifests**: Analogous to the previous step, you can deploy the Helm Charts from my OCI registry with the following command: 
+
+    ```bash
+    helm upgrade --install stack-io oci://registry-1.docker.io/guirgouveia/stack-io -v ./mysql-values.yaml --create-namespaces -n stack-io
+    ```
+    or deploy it with `kubectl kustomize` running:
+      
+    ```bash
+    kubectl apply -k stack-io
     ```
 
-3. **Verify the Deployment and Service**: You can verify that the Deployment and Service were created successfully by running the following commands:
+The Helm Charts are located in the [helm](./helm) folder and the Kubernetes Manifests are located in the [manifests](./manifests) folder for each app of the stack. The `kustomization.yaml` files are responsible for declaring the resources to be deployed and the automatic generation of Secrets and ConfigMaps. 
+
+The Helm Charts are continuously built, packaged and pushed to my OCI registry at DockerHub using GitHub Actions, in order to provide the latest stable version of the application. 
+
+In the Development stage, you can install the Helm Charts directly from the local files by running the following command:
+
+```bash
+helm install stack-io stack-io/helm/stack-io
+```
+
+1. **Verify the Deployment and Service**: You can verify that the Deployment and Service were created successfully by running the following commands:
 
     ```bash
     kubectl get deployments -n stack-io
     kubectl get services -n stack-io
     ```
 
-4. **Access the Application**: If everything was set up correctly, you should be able to access the application by forwarding a port from your local machine to the Service in the cluster:
+2. **Access the Application**: If everything was set up correctly, you should be able to access the application by forwarding a port from your local machine to the Service in the cluster:
 
     ```
     kubectl port-forward svc/stack-io 8083:8080 -n stack-io
     ```
 
 The application should now be accessible at http://localhost:8083.
+
+### Using Skaffold for Development
+
+To use Skaffold for development, make sure to install [Skaffold](https://skaffold.dev/docs/install/) and [kubectl 1.14 or higher](https://kubernetes.io/docs/tasks/tools/install-kubectl/) first.
+
+Then, run the following command to create the pipeline that will do the local CI/CD:
+
+    ```bash
+    skaffold dev
+    ```
+
+This will create a pipeline that will watch for changes in the source code, as well as in the Kubernetes manifests, and continuously build and push the image to the remote registry, and deploy the app to the specified Kubernetes cluster.
+
+The application should now be accessible at http://localhost:8084.
 
 ## Prerequisites
 
