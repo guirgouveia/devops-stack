@@ -41,16 +41,25 @@ RUN mkdir -p /tmp/output && \
 # Creates the final stage from the official Debian slim image
 FROM debian:stable-slim AS final
 
+# Sets the ARGs and ENVs
 ARG APP_HOME
 ARG HTTP_PORT
 ENV APP_HOME="$APP_HOME"
 ENV HTTP_PORT="$HTTP_PORT"
 
+# Set the timezone to UTC
+ENV TZ=UTC
+
+# Set the locale to en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
+    
+# Set the default shell to bash
+SHELL ["/bin/sh", "-c"]
+
 # Set the working directory
 WORKDIR /app
-
-# Sets the working directory to the "$APP_HOME" directory
-WORKDIR "$APP_HOME"
 
 # Copies only the necessary files from the previous stage
 COPY --from=builder /tmp/output/ ./
@@ -60,20 +69,13 @@ RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get instal
     ca-certificates
 
 # Optimize image and install curl for healthcheck
+# Install tzdata and locales for timezone and locale configuration
 RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    tzdata \
+    locales \
     curl && \
-    rm -rf /var/lib/apt/lists/*
-
-# Configures the healthcheck to continuously check if the application is running
-# If it fails, the container will be restarted
-HEALTHCHECK --interval=30s \
-             --timeout=30s \
-             --start-period=5s \
-             --retries=3 \
-             CMD [ "sh", "-c", "curl -f http://localhost:$HTTP_PORT/ready || exit 1" ]
-
-# Exposes port 8080
-EXPOSE "$HTTP_PORT"
+    rm -rf /var/lib/apt/lists/* && \
+    locale-gen en_US.UTF-8 
 
 # Create a group and user to ensure the process does not run as root
 RUN groupadd -r stack-io && useradd -r -g stack-io stack-io
@@ -84,5 +86,8 @@ RUN chown stack-io:stack-io /app
 # Switch to the new user
 USER stack-io
 
+# Exposes port 8080
+EXPOSE "$HTTP_PORT"
+    
 # Runs the application
 CMD "$APP_HOME/main"

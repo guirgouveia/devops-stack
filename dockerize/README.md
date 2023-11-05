@@ -7,7 +7,7 @@ The app requires a MySQL Server running, so use the provided [Kubernetes templat
 
 An initial *blog* database is created for storing blog posts, but it's empty as no content is provided by the assigner. 
 
-The Docker Compose file also sets up volumes for data and log persistence, and demonstrates passing environment variables using Dockerfile ARGs and ENVs instructions.
+The Docker Compose file also sets up volumes for data and log persistence, and demonstrates passing environment variables using Dockerfile ARGs and ENVs instructions. The environment variables passed in the Docker Compose file are defined in the .env file.
 
 # Additional Packages
 
@@ -99,6 +99,11 @@ The final stage is based on a slim Debian image that contains only the bare mini
 Furthermore, the following configurations are applied:
 
 - The Dockerfile installs the certificates for the CA certificates in the builder stage. This is required to make HTTPS calls.
+- The Dockerfile sets:
+  -  the timezone to UTC to avoid issues with timezones.
+  - the locale to en_US.UTF-8 to avoid issues with locales.
+  - the default shell to bash to avoid issues with shells.
+- The Dockerfile includes a HEALTHCHECK with curl to check if the webserver is running.
 - The Dockerfile removes the apt cache to reduce the image size. This is done in the same layer as the apt-get install command to reduce the image size.
 
 # Task 1: Dockerize
