@@ -62,6 +62,7 @@ Furthermore, a [__server.config__](./dockerize/server.config) file to instruct t
 
 Additionally, the Docker Compose file also creates a volume to persist the data in the MySQL server and a volume to persist the logs in the app, as well as makes use of Dockerfile ARGs and ENVs instructions to demonstrate how to pass the necessary environment variables to the app.
 
+Last but not least, you can also deploy the MySQL server using the Bitnami's Helm chart for MySQL, which is available in the [Bitnami Helm Charts repository](https://artifacthub.io/packages/helm/bitnami/mysql), using the [values.yaml](./kubernetes/mysql/helm/values.yaml) file provided.
 
 ## Dockerized Go Webserver
 
