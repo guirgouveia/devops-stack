@@ -7,13 +7,14 @@ image:
   tag: 8.0.35-debian-11-r0
 metrics:
   enabled: true
+initdbScriptsConfigMap: mysql-init-configmap
 primary:
   persistence:
     enabled: true
     size: 1Gi
-    storageClass: "hostPath"
+    storageClass: hostpath
 secondary:
   persistence:
     enabled: true
     size: 1Gi
-    storageClass: "hostpath"
+    storageClass: hostpath

@@ -1,6 +1,7 @@
 # .sops.yaml
 creation_rules:
-  - unencrypted_regex: "^(apiVersion|metadata|kind|type)$"
+  - path_regex: .enc.yaml$
+    age: age170kjjr9j3y2yl7etp9h7eknp9x4pxwujzvdj95k7j4xxxdags3ssdd4pdk
   - path_regex: .*secrets.yaml$
     age: age170kjjr9j3y2yl7etp9h7eknp9x4pxwujzvdj95k7j4xxxdags3ssdd4pdk
   - path_regex: .*values.yaml$

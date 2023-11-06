@@ -34,7 +34,8 @@ deploy:
       version: 9.14.1
       valuesFiles:
         - "./kubernetes/mysql/helm/values.yaml"
-        - "./kubernetes/mysql/helm/secrets.enc.yaml"
+        - "./kubernetes/mysql/helm/secrets.yaml"
+      useHelmSecrets: true
 profiles:
 - name: prod
   manifests:

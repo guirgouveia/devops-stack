@@ -53,6 +53,8 @@ fi
 cat <<EOF >"$RELATIVE_PATH/.sops.yaml"
 # .sops.yaml
 creation_rules:
+  - path_regex: ".*\.enc.yaml$"
+    age: age170kjjr9j3y2yl7etp9h7eknp9x4pxwujzvdj95k7j4xxxdags3ssdd4pdk
   - path_regex: .*values.yaml$
     age: $SOPS_AGE_RECIPIENTS
   - path_regex: .*secrets.yaml$

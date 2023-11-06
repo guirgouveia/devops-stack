@@ -3,10 +3,10 @@ kind: Kustomization
 namespace: mysql
 
 resources:
-  - manifests/namespace.yaml
-  - manifests/pv.yaml
-  - manifests/deployment.yaml
-  - manifests/service.yaml
+  - namespace.yaml
+  - pv.yaml
+  - deployment.yaml
+  - service.yaml
 
 secretGenerator:
 - name: mysql-secret

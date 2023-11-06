@@ -137,41 +137,79 @@ Run all the below instructions from the kubernetes folder.
 
 #### **Deploying with Helm**
  
- Here we have some options for defining the credentials for the MySQL server safely, without exposing them in the values.yaml. 
+ Here we have many options to deploy the Helm Chart, defining the credentials for MySQL server safely, without exposing them in the values.yaml. Only one of them is used in this repository, but I will list all of them below:
  
- - Use the [Bitnami MySQL Helm Chart](https://artifacthub.io/packages/helm/bitnami/mysql) with SOPS to encrypt the file and store it safely in the repository.
- - Use Kustomize along with Helm to patch the templated Helm Chart with the generated Secrets and ConfigMaps.
- - User helm-secrets plugin to encrypt the file and store it safely in the repository.
+ - Deploy the [Bitnami MySQL Helm Chart](https://artifacthub.io/packages/helm/bitnami/mysql) with SOPS to encrypt/decrypt the file and store it safely in the repository.
+ - Deploy the Helm chart with `helm secrets` plugin to decrypt the secrets before deploying the Helm Chart.
+ - Use Kustomize with `helm secrets` plugin to download the Helm Charts and then patch the templated Helm Chart, for example, to add environment overlays or Secret and ConfigMap generators.
+ - Deploy with Skaffold and `helm secrets` plugin
+ - Define a helmfile.yaml with `helm secrets` to declare a Helm releases desired state in a declarative way.
 
  Below you can find instructions for both option:
 
- #### **Helm and SOPS Secrets Operator** 
+ #### **Using SOPS to encrypt/decrypt sensitive files**
 
- SOPS ( Secret OPerationS ) is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, AGE and PGP. It's a great tool to encrypt files and store them safely in the repository, following GitOps best practices to keep all the configuration versioned in Git repositories.
+ SOPS ( Secret OPerationS ) is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, AGE and PGP. It's a great tool to encrypt files and store them safely in the repository, following **GitOps** best practices to keep all the configuration versioned in Git repositories.
 
  Follow the steps below to encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with SOPS:
 
   1. **Install SOPS**: Install [SOPS](https://github.com/getsops/sops/releases)
-  2. **Configure SOPS**: Install SOPS locally as well as the Operator in the cluster with the [/scripts/configure-sops.sh](/scripts/configure-sops.sh) script in the `scripts` folder.
+  2. **Configure SOPS**: Install SOPS with the [/scripts/configure-sops.sh](/scripts/configure-sops.sh) script in the `scripts` folder.
   3. **Replace secret.yaml**: Replace the encrypted `secrets.yaml` with your unencrypted secret file, according to the Kubernetes official documentation.
-  4. **Encrypt the file with SOPS**: Encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with the following command:
+  4. **Encrypt the file with SOPS**: Encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) and then safely commit the file to your repository.
 
     sops -e -i kubernetes/mysql/secrets.yaml
+  
+  5. **Decrypt the file with SOPS**: Before deploying the Helm Chart, you need to decrypt the file with SOPS, so that Helm can read the file. You can do that with the following command:
 
-  5. **Deploy the SOPS Secrets Operator**: Deploy the SOPS Secrets Operator with the instructions from [ArtifactHub](https://artifacthub.io/packages/helm/sops-secrets-operator/sops-secrets-operator):
+    sops -d -i kubernetes/mysql/secrets.yaml
 
-
-  6. **Deploy the MySQL Helm Chart**: Now, you can deploy the MySQL Helm Chart with the encrypted secrets file with the following command:
+  6. **Deploy the MySQL Helm Chart**: Now, you can deploy the MySQL Helm Chart with the decrypted secrets file with the following command:
     
     helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml -v ./mysql/secrets.yaml --create-namespaces -n mysql
   
   Now you can freely commit the encrypted file to the repository. Always double-check if the file is encrypted before committing it. There are tools that can help you with that, or you can create a pre-commit hook to check if there are unencrypted secret files before committing it.
 
- It joins the best of both worlds, using Helm to deploy the MySQL Server and Kustomize to generate the Secrets and ConfigMaps, in order to avoid storing sensitive information in the repository.
+  If you change the AGE key, you will have to [update the encrypted files](https://github.com/getsops/sops#adding-and-removing-keys) with:
 
- ```bash
- helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml --create-namespaces -n mysql
- ```
+    sops updatekeys /path/to/secret.enc.yaml
+    
+#### Helm-secrets plugin
+
+`helm-secrets` is a Helm plugin that enables on-the-fly decryption of encrypted Helm value files.
+
+- Utilize `sops` to encrypt your value files and securely store them in your git repository.
+- Leverage cloud-native secret managers such as AWS SecretManager, Azure KeyVault, or HashiCorp Vault to store your secrets and inject them directly into your value files or templates.
+- Integrate `helm-secrets` with your preferred deployment tool or GitOps Operator, such as FluxCD, for a seamless deployment experience.
+
+By convention, files containing secrets are named secrets.yaml, or anything beginning with "secrets" and ending with ".yaml". E.g. secrets.test.yaml, secrets.prod.yaml secretsCOOL.yaml.
+
+Read the [official documentation](https://github.com/jkroepke/helm-secrets/wiki/Usage) for more detailed information
+
+1. **Install the plugin**: 
+    ```bash
+    helm plugin install https://github.com/jkroepke/helm-secrets --version v4.5.1
+    ```
+1. Now, instead of running `helm` commands, you will run `helm secrets`. For example, to install the MySQL Helm Chart, you will run:
+   
+    ```bash
+    # Change directory to the helm folder
+    cd $(git rev-parse --show-toplevel)/kubernetes/mysql/helm
+
+    helm secrets upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql --version 9.14.1 -f ./values.yaml -f ./secrets.yaml --create-namespace -n mysql
+    ```
+
+Notice from the logs that it detects the secret file automatically and then temporarily decrypts the secrets.yaml file to finally use it as input for the Helm release, reencrypting it at the end.
+
+#### Helm-secrets plugin in Skaffold
+
+In this repository, the `helm-secrets` plugin is used to encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with SOPS and store it safely in the repository, following GitOps best practices to keep all the configuration versioned in Git repositories. Then, for the Helm charts deployment we use Skaffold, which leverages the helm-secrets plugin via the `useHelmSecrets: true` attribute in the [skaffold.yaml](/skaffold.yaml) file to decrypt the secrets file before deploying the Helm Chart.
+
+#### Helm and Kustomize
+
+Another common option is to use Helm to get the Helm chart templates and patch them with Kustomize to generate the Secrets and ConfigMaps from local files, in order to avoid storing sensitive information in the repository.
+
+ It joins the best of both worlds, using Helm to deploy the MySQL Server and Kustomize to generate the Secrets and ConfigMaps, in order to avoid storing sensitive information in the repository.
 
    1. Deploying with Helm and Kustomize
 

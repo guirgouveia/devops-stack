@@ -3,13 +3,13 @@ kind: Kustomization
 namespace: stack-io
 
 resources:
-  - manifests/namespace.yaml
-  - manifests/rbac.yaml
-  - manifests/deployment.yaml
-  - manifests/service.yaml
-  - manifests/ingress.yaml
-  - manifests/pvc.yaml
-  - manifests/network-policy.yaml
+  - namespace.yaml
+  - rbac.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - pvc.yaml
+  - network-policy.yaml
 
 secretGenerator:
 - name: stack-io-db-secret

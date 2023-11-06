@@ -4,6 +4,10 @@ Certainly! Here's the entire revised `README.md` content in Markdown format:
 
 Welcome to my personal project repository, where my journey with the company Stack.io has blossomed into a showcase of my seven-year tenure in the DevOps arena. This vibrant platform, initially an assignment, has evolved into a comprehensive personal blog and a demonstration of integrated DevOps, DevSecOps, and GitOps best practices using Golang and Vue.js.
 
+The idea is to show as many options from the latest DevOps trends as possible for developing and continuously build and deploy a Golang webserver, from local to cloud deployment in a Kubernetes Cluster, with a strong focus on automation, security, scalability, reliability and future-proofing. 
+
+The project is designed for extensibility, encouraging forks and contributions, and laying down a solid foundation for others to build upon.
+
 **Note:** The project is still under development, with some features yet to be released publicly.
 
 ## Project Overview
