@@ -79,17 +79,17 @@ spec:
             path: /health
             port: 8080
           initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
+          periodSeconds: 20
+          timeoutSeconds: 10
+          failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /ready
             port: 8080
           initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3
+          periodSeconds: 20
+          timeoutSeconds: 10
+          failureThreshold: 5
         volumeMounts:
         - name: logs
           mountPath: /var/logs/webserver
@@ -100,9 +100,6 @@ spec:
           mountPath: /app/hooks
         lifecycle:
           postStart:
-            # httpGet:
-            #   path: /post-start-hook
-            #   port: 8080
             exec:
               command: ["/bin/sh","-c", "/app/hooks/post-start-hook.sh"]
           preStop:
