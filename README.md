@@ -140,3 +140,7 @@ The final stage is based on a slim Debian image that contains only the bare mini
 Furthermore, the following configurations are applied:
 
 - The Dockerfile installs the certificates for
+
+### Further Improvements
+
+- Create a Pre-Commit Hook to avoid commiting sensitive data.
