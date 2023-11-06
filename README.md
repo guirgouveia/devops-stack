@@ -1,5 +1,20 @@
 # Introduction
 
+This project began as an assignment from Stack.io for a Senior DevOps role, but as I delved into Golang and Vue.js to create a personal blog, it turned into a vibrant platform to showcase my seven years of DevOps expertise, integrating DevSecOps and GitOps best practices.
+
+Initially, the focus was on developing and dockerizing a Golang Webserver and a Vue.js Frontend. The deployment process was handled with Docker, Docker Compose, and Kubernetes, both locally and on the cloud. Terraform played a significant role in molding the cloud infrastructure, adhering to Cloud Infrastructure's best standards.
+
+Though still a work in progress with some implementations yet to be shared on the public repository, it's a treasure trove of tools and DevOps implementations.
+
+I incorporated Skaffold pipelines for streamlined local development, and with FluxCD, forged a GitOps route for continuous app deployments across dev, staging, and production environments within the cluster. Additionally, Istio Service Mesh and Flagger were introduced for enhanced cluster security and canary deployments. The monitoring aspects were enriched with SRE elements through Prometheus and Grafana, while Linkerd addressed logging.
+
+To bolster security, a range of DevSecOps tools were integrated, safeguarding against vulnerabilities and misconfigurations, and ensuring encrypted and version-controlled secrets in the repository, all in tune with GitOps best practices.
+
+The project is thoroughly documented, with guides, roadmaps, and suggestions for future enhancements dispersed across folders. Its design enables anyone to fork it and embark on developing their own app stack, building on the solid foundation I've laid down.
+The GitHub repository for this project can be found at https://github.com/guirgouveia/stack.io This project began as an assignment from Stack.io for a Senior DevOps role, but as I delved into Golang and Vue.js to create a personal blog, it turned into a vibrant platform to showcase my seven years of DevOps expertise, integrating DevSecOps and GitOps best practices. Initially, the focus was on developing and dockerizing a Golang Webserver and a Vue.js Frontend. The deployment process was handled with Docker, Docker Compose, and Kubernetes, both locally and on the cloud. Terraform played a significant role in molding the cloud infrastructure, adhering to Cloud Infrastructure's best standards. Though still a work in progress with some implementations yet to be shared on the public repository, it's a treasure trove of tools and DevOps implementations. I incorporated Skaffold pipelines for streamlined local development, and with FluxCD, forged a GitOps route for continuous app deployments across dev, staging, and production environments within the cluster. Additionally, Istio Service Mesh and Flagger were introduced for enhanced cluster security and canary deployments. The monitoring aspects were enriched with SRE elements through Prometheus and Grafana, while Linkerd addressed logging. To bolster security, a range of DevSecOps tools were integrated, safeguarding against vulnerabilities and misconfigurations, and ensuring encrypted and version-controlled secrets in the repository, all in tune with GitOps best practices. The project is thoroughly documented, with guides, roadmaps, and suggestions for future enhancements dispersed across folders. Its design enables anyone to fork it and embark on developing their own app stack, building on the solid foundation I've laid down.
+
+**Skills & Tools**: Infrastructure as code (IaC) · Continuous Integration and Continuous Delivery (CI/CD) · Cloud Infrastructure · Container Orchestration · Solution Architecture · Go (Programming Language) · Vue.js · FluxCD · Prometheus · Microsoft Azure · DevSecOps · GitOps · Terraform · Kubernetes · AWS · Docker · Istio · Grafana
+
 # MySQL Server
 
 The app requires a MySQL Server to connect, so a directory containing the [Kubernetes templates](./kubernetes/mysql) to deploy the MySQL Server used by the app is provided for your convenience.
