@@ -2,12 +2,16 @@ package kuberneteshandler
 
 import (
 	"bytes"
+	"context"
 	"dockerize/webserver/articlehandler"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func TerminateGracefully(w http.ResponseWriter, r *http.Request) {
@@ -16,12 +20,47 @@ func TerminateGracefully(w http.ResponseWriter, r *http.Request) {
 	os.Exit(0)
 }
 
-func PreStopHook(w http.ResponseWriter, r *http.Request) {
+// PreStopHookWrapper is used to adapt the PreStopHook function to the http.HandlerFunc signature.
+func PreStopHookWrapper(httpServer *http.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		PreStopHook(w, r, httpServer)
+	}
+}
+
+func PreStopHook(w http.ResponseWriter, r *http.Request, httpServer *http.Server) {
+	// Create a channel to receive the SIGTERM signal
+	gracefulStop := make(chan os.Signal, 1)
+
+	// Notify the channel when a SIGTERM signal is received
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+
+	// Block the execution until a SIGTERM signal is received
+	<-gracefulStop
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	log.Println("Shutdown signal received, commencing graceful shutdown...")
+
+	// Try to gracefully shutdown the http server and handle the error, if any
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Println("Pre-Stop Hook failed to gracefully shutdown the server.")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Pre-Stop Hook failed to gracefully shutdown the server."))
+	} else {
+		log.Println("Server gracefully stopped")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Server gracefully stopped."))
+	}
+}
+
+func SendRequest(w http.ResponseWriter, r *http.Request) {
 	// Prepare an empty JSON payload
 	payload := []byte("{}")
 
-	// Create a new request using http
-	req, err := http.NewRequest("POST", "https://localhost:8080/terminate-gracefully", bytes.NewBuffer(payload))
+	// Create a new request using http to shutdown the database
+	req, err := http.NewRequest("POST", "https://mysql.mysql:8080/terminate-gracefully", bytes.NewBuffer(payload))
 	if err != nil {
 		log.Fatalf("Failed to create request: %v", err)
 	}
@@ -49,10 +88,18 @@ func PreStopHook(w http.ResponseWriter, r *http.Request) {
 func PostStartHook(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 
+	// Check if the request body is "Hello, World!"
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Internal Server Error"))
 	} else if string(body) == "Hello, World!" {
+		// Check if the database is ready
+		err := articlehandler.GetDatabase().Ping()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Database not ready!"))
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Hello World"))
 	} else {

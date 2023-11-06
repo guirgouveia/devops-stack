@@ -49,7 +49,10 @@ volumes:
   mysql_data:
     driver: local
     name: stack-io-mysql-data
-
+  mysql_logs:
+    driver: local
+    name: stack-io-mysql-logs
+    
 networks:
   default:
     name: stack-io

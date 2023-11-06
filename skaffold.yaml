@@ -1,0 +1,61 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: stack-io
+build:
+  local:
+    # Tell Skaffold to skip pushing image to a registry
+    # and importing the image directly into the local cluster for testing
+    push: true
+    # The following instructions tell Skaffold to use the 
+    # local Docker daemon to build the image.
+    useDockerCLI: false
+    useBuildkit: false
+    # Import missing artifacts from the local Docker daemon.
+    # This should be taken into consideration for vulnerabilities. 
+    # https://skaffold.dev/docs/builders/build-environments/local/#build-avoidance-with-tryimportmissing
+    tryImportMissing: false
+  tagPolicy:
+    gitCommit:
+      prefix: local
+  artifacts:
+    - image: grgouveia/stack-io
+      context: ./dockerize
+      docker:
+        dockerfile: Dockerfile
+deploy:
+  kubeContext: docker-desktop
+  kubectl: {}
+profiles:
+- name: prod
+  manifests:
+    kustomize:
+      paths:
+      - overlays/prod
+- name: staging
+  manifests:
+    kustomize:
+      paths:
+      - overlays/staging
+manifests:
+  kustomize:
+    paths:
+    - kubernetes/stack-io
+  # TODO: when the Helm Charts are ready
+  # helm:
+  #   releases:
+  #     - name: stack-io
+  #       namespace: stack-io
+  #       chartPath: helm/stack-io
+  #       valuesFiles:
+  #         - helm/stack-io/values.yaml
+  #       # This overrides the image tag whose default is the one in the values.yaml file.
+  #       # with the image tag from the Skaffold build config.
+  #       setValueTemplates:
+  #         image.tag: "{{.IMAGE_TAG}}"
+  #       version: 0.1.0
+portForward:
+  - resourceType: service
+    resourceName: stack-io
+    port: 8080
+    localPort: 8084
