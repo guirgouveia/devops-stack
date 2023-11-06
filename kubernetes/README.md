@@ -131,16 +131,56 @@ Both Helm Charts and Kubernetes Manifests are declared to deploy the application
 
 1. **Start Minikube**: Start your local Minikube cluster by running the command `minikube start`.
 
-2. **Deploy MySQL Server**: Deploy Bitnami's MySQL Server OCI Helm Charts in your cluster with the following command:
+2. **Deploy MySQL Server**: You can deploy the Replicated StatefulSet MySQL Server with Helm Charts from the [Bitnami Helm Charts Repository](https://artifacthub.io/packages/helm/bitnami/mysql) or with Kubernetes Manifests declared in this repo to deploy a single instance MySQL Server, based on the official [Kubernetes documentation](https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/).
 
-    ```bash
-    helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml --create-namespaces -n mysql
-    ```
-    or deploy it with `kubectl kustomize` running:
+Run all the below instructions from the kubernetes folder.
+
+#### **Deploying with Helm**
+ 
+ Here we have some options for defining the credentials for the MySQL server safely, without exposing them in the values.yaml. 
+ 
+ - Use the [Bitnami MySQL Helm Chart](https://artifacthub.io/packages/helm/bitnami/mysql) with SOPS to encrypt the file and store it safely in the repository.
+ - Use Kustomize along with Helm to patch the templated Helm Chart with the generated Secrets and ConfigMaps.
+ - User helm-secrets plugin to encrypt the file and store it safely in the repository.
+
+ Below you can find instructions for both option:
+
+ #### **Helm and SOPS Secrets Operator** 
+
+ SOPS ( Secret OPerationS ) is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, AGE and PGP. It's a great tool to encrypt files and store them safely in the repository, following GitOps best practices to keep all the configuration versioned in Git repositories.
+
+ Follow the steps below to encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with SOPS:
+
+  1. **Install SOPS**: Install [SOPS](https://github.com/getsops/sops/releases)
+  2. **Configure SOPS**: Install SOPS locally as well as the Operator in the cluster with the [/scripts/configure-sops.sh](/scripts/configure-sops.sh) script in the `scripts` folder.
+  3. **Replace secret.yaml**: Replace the encrypted `secrets.yaml` with your unencrypted secret file, according to the Kubernetes official documentation.
+  4. **Encrypt the file with SOPS**: Encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with the following command:
+
+    sops -e -i kubernetes/mysql/secrets.yaml
+
+  5. **Deploy the SOPS Secrets Operator**: Deploy the SOPS Secrets Operator with the instructions from [ArtifactHub](https://artifacthub.io/packages/helm/sops-secrets-operator/sops-secrets-operator):
+
+
+  6. **Deploy the MySQL Helm Chart**: Now, you can deploy the MySQL Helm Chart with the encrypted secrets file with the following command:
+    
+    helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml -v ./mysql/secrets.yaml --create-namespaces -n mysql
+  
+  Now you can freely commit the encrypted file to the repository. Always double-check if the file is encrypted before committing it. There are tools that can help you with that, or you can create a pre-commit hook to check if there are unencrypted secret files before committing it.
+
+ It joins the best of both worlds, using Helm to deploy the MySQL Server and Kustomize to generate the Secrets and ConfigMaps, in order to avoid storing sensitive information in the repository.
+
+ ```bash
+ helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml --create-namespaces -n mysql
+ ```
+
+   1. Deploying with Helm and Kustomize
+
+   2. Deploy the manifests with `kubectl kustomize` running:
       
     ```bash
     kubectl apply -k mysql
     ```
+
 The OCi registries dispenses the need of adding the helm repository to your local machine and instead downloads the chart directly from the registry. 
 
 The `mysql-values.yaml` file contains the values that will be used to configure the MySQL Server.

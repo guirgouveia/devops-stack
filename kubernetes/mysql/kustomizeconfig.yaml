@@ -1,24 +1,43 @@
 nameReference:
-- kind: ConfigMap
-  version: v1
-  fieldSpecs:
-  - kind: Deployment
-    path: spec/template/spec/volumes[]/configMap/name
-  - kind: Deployment
-    path: spec/template/spec/containers[0]/envFrom[0]/configMapRef/name
-  - kind: StatefulSet
-    path: spec/template/spec/volumes[]/configMap/name
-  - kind: StatefulSet
-    path: spec/template/spec/containers[0]/envFrom[0]/configMapRef/name
-
-- kind: Secret
-  version: v1
-  fieldSpecs:
-  - kind: Deployment
-    path: spec/template/spec/volumes[]/secret/secretName
-  - kind: Deployment
-    path: spec/template/spec/containers[0]/envFrom[0]/secretRef/name
-  - kind: StatefulSet
-    path: spec/template/spec/volumes[]/secret/secretName
-  - kind: StatefulSet
-    path: spec/template/spec/containers[0]/envFrom[0]/secretRef/name
+    - kind: ConfigMap
+      version: v1
+      fieldSpecs:
+        - kind: Deployment
+          path: spec/template/spec/volumes[]/configMap/name
+        - kind: Deployment
+          path: spec/template/spec/containers[0]/envFrom[0]/configMapRef/name
+        - kind: StatefulSet
+          path: spec/template/spec/volumes[]/configMap/name
+        - kind: StatefulSet
+          path: spec/template/spec/containers[0]/envFrom[0]/configMapRef/name
+    - kind: Secret
+      version: v1
+      fieldSpecs:
+        - kind: Deployment
+          path: spec/template/spec/volumes[]/secret/secretName
+        - kind: Deployment
+          path: spec/template/spec/containers[0]/envFrom[0]/secretRef/name
+        - kind: StatefulSet
+          path: spec/template/spec/volumes[]/secret/secretName
+        - kind: StatefulSet
+          path: spec/template/spec/containers[0]/envFrom[0]/secretRef/name
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1v66elvn26caae503t473sx26cks2sa86v9caexe3vsw5pkctpp0s6q2zgt
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBZcHlzVlBHcEsyL0crczNT
+            aytFL0tYNHFzVzFpS1Uwd1BjNlErdXNwVW5nCjJ3Y1QzdmkzOVd1eW4vR0ZyU1Fk
+            ZlMzTE5FSjhad2E4VWQrOSt2bWZDYzAKLS0tIDdhcHEzOU0vTkhCOG9nNUZDQ3lr
+            eW1IQWRRL3FJbXFmWkJUMWIxWWZ5VEUKNiVUaT07AtZfw0/04qm5lai+yu0acq4w
+            d80mX/qJPeyQ5YsdJ+njrPn/s9LtR3t57gNM2JYc3UbQaCnKujVzWw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2023-11-06T13:57:12Z"
+    mac: ENC[AES256_GCM,data:7y3GsBPlcKpMWVrH3oQL6wvsH3v+kTtSvn44lzCU7tsLS8qEoJRa8YmqdtVzpPzXhe5sImX86VxEa+PEDwCWTbu8+Jhe+t9pXJTDunC2okIKa73LFbf2YCcu4nQYXHdewUGsJI5qv56kUiNcZ466K0BwN1tcPFp5IKNOgHQuA2E=,iv:hWV0ddy96NBNbB8g3Ema8jAR7TpsIvWfmsMAslfALeM=,tag:0DaFxseuKE4HIxhcWyhkJw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.3

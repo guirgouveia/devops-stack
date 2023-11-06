@@ -47,14 +47,6 @@ ARG HTTP_PORT
 ENV APP_HOME="$APP_HOME"
 ENV HTTP_PORT="$HTTP_PORT"
 
-# Set the timezone to UTC
-ENV TZ=UTC
-
-# Set the locale to en_US.UTF-8
-ENV LANG=en_US.UTF-8 \
-    LANGUAGE=en_US:en \
-    LC_ALL=en_US.UTF-8
-    
 # Set the default shell to bash
 SHELL ["/bin/sh", "-c"]
 
@@ -77,8 +69,20 @@ RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get instal
     rm -rf /var/lib/apt/lists/* && \
     locale-gen en_US.UTF-8 
 
-# Create a group and user to ensure the process does not run as root
-RUN groupadd -g 999 -r stack-io && useradd  -u 999 -r -g stack-io stack-io
+# Set the timezone to UTC
+ENV TZ=UTC
+
+# Set the locale to en_US.UTF-8
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
+
+# Create a new group "stack-io" with GID 999
+RUN addgroup --gid 999 stack-io
+
+# Create a new user "stack-io" with UID 999 and add it to the newly created "stack-io" group
+RUN adduser --uid 999 --ingroup stack-io --shell /bin/bash --disabled-password --gecos "" stack-io
+
 
 # Change the ownership of the /app directory to myuser
 RUN chown stack-io:stack-io /app
