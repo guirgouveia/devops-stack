@@ -6,7 +6,7 @@ Initially, the focus was on developing and dockerizing a Golang Webserver and a 
 
 Though still a work in progress with some implementations yet to be shared on the public repository, it's a treasure trove of tools and DevOps implementations.
 
-I incorporated Skaffold pipelines for streamlined local development, and with FluxCD, forged a GitOps route for continuous app deployments across dev, staging, and production environments within the cluster. Additionally, Istio Service Mesh and Flagger were introduced for enhanced cluster security and canary deployments. The monitoring aspects were enriched with SRE elements through Prometheus and Grafana, while Linkerd addressed logging.
+Skaffold was incorporated to the pipelines for streamlined local development, and with FluxCD, forged a GitOps route for continuous app deployments across dev, staging, and production environments within the cluster. Additionally, Istio Service Mesh and Flagger were introduced for enhanced cluster security and canary deployments. The monitoring aspects were enriched with SRE elements through Prometheus and Grafana, while Linkerd addressed logging.
 
 To bolster security, a range of DevSecOps tools were integrated, safeguarding against vulnerabilities and misconfigurations, and ensuring encrypted and version-controlled secrets in the repository, all in tune with GitOps best practices.
 

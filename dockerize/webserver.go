@@ -15,8 +15,8 @@ import (
 )
 
 func init() {
-	if _, noLog := os.Stat("/var/logs/webserver.log"); os.IsNotExist(noLog) {
-		newLog, err := os.Create("/var/logs/webserver.log")
+	if _, noLog := os.Stat("/var/logs/webserver/webserver.log"); os.IsNotExist(noLog) {
+		newLog, err := os.Create("/var/logs/webserver/webserver.log")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -30,8 +30,8 @@ func init() {
 	check(err)
 	dbChecker := time.NewTicker(time.Minute)
 	articlehandler.PassDataBase(db)
-	go checkDB(dbChecker, db)
-
+	kuberneteshandler.PassDataBase(db)
+	go checkDB(dbChecker, db) // Check the database connection every minute
 }
 
 func main() {
@@ -75,7 +75,7 @@ func readConfig(s string) string {
 
 func check(err error) {
 	if err != nil {
-		errorLog, osError := os.OpenFile("/var/logs/webserver.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		errorLog, osError := os.OpenFile("/var/logs/webserver/webserver.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if osError != nil {
 			log.Fatal(err)
 		}

@@ -36,12 +36,84 @@ For the liveness probe, the application is considered healthy if it returns a 20
 
 ## Lifecycle Hooks
 
-Simply to illustrate how to use [Kustomize's Secret Generator](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/) along with [Volume Mounts](https://kubernetes.io/docs/concepts/storage/volumes/) and [Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/), the [Lifecycle Hooks](./manifests/config/hooks) folder contains the hooks that will be used by Kustomize ConfigMap and Secret Generator to generate the ConfigMap and Secret that will be mounted as a Volume in the Deployment. 
+Simply to illustrate how to use [Kustomize's Secret Generator](https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-kustomize/) along with [Volume Mounts](https://kubernetes.io/docs/concepts/storage/volumes/) and [Lifecycle Hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/), the [Lifecycle Hooks](./manifests/config/hooks) folder contains the hook scripts that will be used by Kustomize Generator to generate new ConfigMap and Secrets upon changes in the hook scripts.
 
 The hooks are:
 
-- **Post-Start hook**: prints a message to the console when the application starts.
+- **Post-Start hook**: used to verify if the database connection is ready when the application starts. The application is considered ready if it returns a 200 status code in the `/post-start-hook` endpoint.
+
 - **Pre-Stop hook**: used to gracefully shutdown the application when the pod is terminated. The application is considered ready to be terminated if it returns a 200 status code in the `/health` endpoint.
+
+### Pre-Stop Hook
+
+The Pre-Stop Hook deservers a more detailed explanation as it's responsible for gracefully shutting down the application when the pod is terminated. The application is considered ready to be terminated if it passes the pre-stop hook.
+
+As previously stated, the pre-stop hook executes a shell script loaded via a ConfigMap created with Kustomize from the [kustomization.yaml](./stack-io/kustomization.yaml) file's ConfigMap Generator. It then is mounted as a volume in the pod and the script is executed when the pod is terminated.
+
+The pre-stop hook script defined [here](./stack-io/config/hooks/pre-stop.sh) is responsible for sending a `SIGTERM` signal to the application and waiting for it to gracefully shutdown. If the application doesn't shutdown in the specified terminationGracePeriodInSecond Deployment attribute, which is set to 60 seconds in this case, the container is killed. Notice that the pre-stop hook and the terminationGracePeriodInSecond run in parallel, so the application has 60 seconds to gracefully shutdown before it is killed, regardless of the pre-stop hook having finished or not.
+
+Basically, the Pre-Stop Hook is responsible for the following steps:
+
+1. **Send Request**: Send a curl request to the `/pre-stop-hook` endpoint of the application to trigger the pre-stop hook from within the webserver.
+
+    ```bash
+    response=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/pre-stop-hook || echo "Pre-Stop Hook curl request failed.")
+    ```
+
+2. **Handle Pre-Stop Hook endpoint**: The webserver will then invoke the pre-stop hook endpoint handler, which will send a `SIGTERM` signal to the application and wait for it to gracefully shutdown.
+
+    ```go
+    // PreStopHookWrapper is used to adapt the PreStopHook function to the http.HandlerFunc signature.
+    func PreStopHookWrapper(httpServer *http.Server) http.HandlerFunc {
+        return func(w http.ResponseWriter, r *http.Request) {
+            PreStopHook(w, r, httpServer)
+        }
+    }
+
+    func PreStopHook(w http.ResponseWriter, r *http.Request, httpServer *http.Server) {
+        // Notify the channel when a SIGTERM signal is received
+        signal.Notify(gracefulStop, syscall.SIGTERM)
+
+        // Block the execution until a SIGTERM signal is received
+        <-gracefulStop
+        
+        ... 
+        // Shutdown the server and return 200 status code if successful
+        if err := httpServer.Shutdown(ctx); err != nil {
+            log.Println("Pre-Stop Hook failed to gracefully shutdown the server.")
+		    w.WriteHeader(http.StatusInternalServerError)
+        
+        ...
+
+    }
+    ```
+
+* Notice that a Wrapper function is used to adapt the `PreStopHook` function to the `http.HandlerFunc` signature, as the `http.HandlerFunc` type is defined as `type HandlerFunc func(ResponseWriter, *Request)`, while the `PreStopHook` function is defined as `func PreStopHook(w http.ResponseWriter, r *http.Request, httpServer *http.Server)`. This was done to isolate all Kubernetes Handlers in one package to keep the project organized.
+
+3. **Return Result to Kubernetes API**: The Pre-Stop hook will then receive a Status.OK 200 status code from the webserver and exit the script returning a Status.OK 200 status code to the Kubernetes API Server to signal that the application is ready to be terminated.
+
+After this, the Kubernetes API Server will wait for the terminationGracePeriodInSecond to expire before killing the container, if the application hasn't already gracefully shutdown, because the Pre-Stop Hook took too long to execute. That's why we don't create long-running processes in the Pre-Stop Hook, as it will delay the termination of the pod. Usually, it's a good practice to configure the terminationGracePeriodInSecond to be at least 30 seconds longer than the time it takes for the application to gracefully shutdown by the Pre-Stop Hook.
+
+Additionally, Pre-Stop Hooks are useful for applications that need to save state before exiting or to finish processing current requests.
+
+### Init Container
+
+The stack.io deployment contains two init containers. The first Init Container is called `sleep` and is used to wait for 30 seconds to wait for other services, as the MySQL Server, to be ready before the application starts.
+
+- **Wait for 30 seconds**: The init container will wait for 30 seconds before the application starts.
+
+    ```yaml
+    initContainers:
+    - name: wait-for-mysql
+        image: busybox
+        command: ['sh', '-c', 'sleep 30']
+    ```
+
+The other Init Container is called `setup` and prepares the files used by the application, such as making the Lifecycle Hooks executable and setting the correct permissions to the files, so that the Pod can write to the /var/logs/webserver directory.
+
+### Post-Start Hook
+
+The Post-Start Hook is created analogously to the Pre-Stop Hook, but it's used to send a "Hello World!" message to the webserver, that will read the body of the request and check if the message is "Hello World!" to then check if the database is ready. The post-start hook succeeds if the webserver returns a 200 status code and replies with another "Hello World!" message.
 
 ## Getting Started
 
@@ -116,12 +188,14 @@ To use Skaffold for development, make sure to install [Skaffold](https://skaffol
 Then, run the following command to create the pipeline that will do the local CI/CD:
 
     ```bash
-    skaffold dev
+    skaffold dev --keep-running-on-failure=true
     ```
 
 This will create a pipeline that will watch for changes in the source code, as well as in the Kubernetes manifests, and continuously build and push the image to the remote registry, and deploy the app to the specified Kubernetes cluster.
 
-The application should now be accessible at http://localhost:8084.
+After making changes to the Kubernetes manifests or source code, hit Enter in the terminal to restart the pipeline.
+
+The application should now be accessible at http://localhost:8084, as Skaffold automatically creates a port-forward.
 
 ## Prerequisites
 

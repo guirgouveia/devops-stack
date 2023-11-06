@@ -1,16 +1,8 @@
-# File contains default values for MySQL Helm chart
 architecture: replicaset
 auth:
   createDatabase: true
   database: blog
   existingSecret: "mysql-db-secret"
-  # password: ""
-  # replicationPassword: ""
-  # replicationUser: replicator
-  # rootPassword: ""
-  # usePasswordFiles: false
-  # username: ""
-# clusterDomain: cluster.local
 diagnosticMode:
   args:
   - infinity
@@ -18,6 +10,8 @@ diagnosticMode:
   - sleep
   enabled: false
 fullnameOverride: ""
+nameOverride: ""
+namespaceOverride: ""
 global:
   imageRegistry: ""
   storageClass: ""
@@ -28,14 +22,14 @@ image:
   registry: docker.io
   repository: bitnami/mysql
   tag: 8.0.35-debian-11-r0
-initdbScriptsConfigMap: ""
+initdbScriptsConfigMap: "mysql-init-configmap"
 kubeVersion: ""
 metrics:
   containerSecurityContext:
     enabled: true
     runAsNonRoot: true
     runAsUser: 1001
-  enabled: false
+  enabled: true
   image:
     digest: ""
     pullPolicy: IfNotPresent
@@ -50,7 +44,7 @@ metrics:
     successThreshold: 1
     timeoutSeconds: 1
   prometheusRule:
-    enabled: false
+    enabled: true
     namespace: ""
   readinessProbe:
     enabled: true
@@ -67,17 +61,15 @@ metrics:
     port: 9104
     type: ClusterIP
   serviceMonitor:
-    enabled: false
+    enabled: true
     honorLabels: false
     interval: 30s
     jobLabel: ""
     namespace: ""
     scrapeTimeout: ""
-nameOverride: ""
-namespaceOverride: ""
 networkPolicy:
   allowExternal: true
-  enabled: false
+  enabled: true
 primary:
   configuration: |-
     [mysqld]
@@ -142,16 +134,9 @@ primary:
     - ReadWriteOnce
     enabled: true
     existingClaim: ""
-    size: 8Gi
-    storageClass: ""
+    size: 1Gi
+    storageClass: "hostPath"
     subPath: ""
-  podAffinityPreset: ""
-  podAntiAffinityPreset: soft
-  podManagementPolicy: ""
-  podSecurityContext:
-    enabled: true
-    fsGroup: 1001
-  priorityClassName: ""
   readinessProbe:
     enabled: true
     failureThreshold: 3
@@ -159,17 +144,9 @@ primary:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 1
-  runtimeClassName: ""
-  schedulerName: ""
   service:
-    clusterIP: ""
-    externalTrafficPolicy: Cluster
-    loadBalancerIP: ""
-    nodePorts:
-      mysql: ""
     ports:
       mysql: 3306
-    sessionAffinity: None
     type: ClusterIP
   startupProbe:
     enabled: true
@@ -178,11 +155,11 @@ primary:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 1
-  terminationGracePeriodSeconds: ""
+  terminationGracePeriodSeconds: "30"
   updateStrategy:
     type: RollingUpdate
 rbac:
-  create: false
+  create: true
 secondary:
   configuration: |-
     [mysqld]
@@ -239,7 +216,7 @@ secondary:
     key: ""
     type: ""
   pdb:
-    create: false
+    create: true
     maxUnavailable: ""
     minAvailable: 1
   persistence:
@@ -247,16 +224,12 @@ secondary:
     - ReadWriteOnce
     enabled: true
     existingClaim: ""
-    size: 8Gi
-    storageClass: ""
+    size: 1Gi
+    storageClass: "hostpath"
     subPath: ""
-  podAffinityPreset: ""
-  podAntiAffinityPreset: soft
-  podManagementPolicy: ""
   podSecurityContext:
     enabled: true
     fsGroup: 1001
-  priorityClassName: ""
   readinessProbe:
     enabled: true
     failureThreshold: 3
@@ -265,17 +238,9 @@ secondary:
     successThreshold: 1
     timeoutSeconds: 1
   replicaCount: 1
-  runtimeClassName: ""
-  schedulerName: ""
   service:
-    clusterIP: ""
-    externalTrafficPolicy: Cluster
-    loadBalancerIP: ""
-    nodePorts:
-      mysql: ""
     ports:
       mysql: 3306
-    sessionAffinity: None
     type: ClusterIP
   startupProbe:
     enabled: true
@@ -284,16 +249,14 @@ secondary:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 1
-  terminationGracePeriodSeconds: ""
+  terminationGracePeriodSeconds: "30"
   updateStrategy:
     type: RollingUpdate
 serviceAccount:
   automountServiceAccountToken: true
   create: true
   name: ""
-serviceBindings:
-  enabled: false
-startdbScriptsConfigMap: ""
+startdbScriptsConfigMap: "mysql-init-configmap"
 volumePermissions:
   enabled: false
   image:

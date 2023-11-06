@@ -27,9 +27,9 @@ spec:
         volumeMounts:
         - name: mysql-persistent-storage
           mountPath: /var/lib/mysql
-        # - name: mysql-init-configmap
-        #   mountPath: /docker-entrypoint-initdb.d/mysql-init.sh
-        #   subPath: mysql-init.sh
+        - name: mysql-init-configmap
+          mountPath: /docker-entrypoint-initdb.d/mysql-init.sh
+          subPath: mysql-init.sh
         resources:
           requests:
             cpu: 500m

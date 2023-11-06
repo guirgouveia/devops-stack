@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: stack-io
+  namespace: stack-io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: stack-io
+  name: reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods, services, deployments, configmaps, secrets"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: stack-io-reader-rb
+  namespace: stack-io
+subjects:
+- kind: ServiceAccount
+  name: stack-io
+roleRef:
+  kind: ClusterRole
+  name: reader
+  apiGroup: rbac.authorization.k8s.io

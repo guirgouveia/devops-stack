@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: stack-io
+  labels:
+    app: stack-io
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: stack-io
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: stack-io.local
+    http:
+      paths:
+      - backend:
+          service:
+            name: stack-io
+            port:
+              name: http
+        path: /(.*)
+        pathType: Prefix

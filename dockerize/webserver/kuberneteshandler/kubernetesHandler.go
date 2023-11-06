@@ -3,6 +3,7 @@ package kuberneteshandler
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"dockerize/webserver/articlehandler"
 	"fmt"
 	"io"
@@ -13,6 +14,17 @@ import (
 	"syscall"
 	"time"
 )
+
+var sqldb *sql.DB
+
+// PassDataBase passes the database to the articleHandlers.
+func PassDataBase(db *sql.DB) {
+	sqldb = db
+}
+
+func GetDatabase() *sql.DB {
+	return sqldb
+}
 
 func TerminateGracefully(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -114,11 +126,10 @@ func HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReadinessCheck(w http.ResponseWriter, r *http.Request) {
-	err := articlehandler.GetDatabase()
-
-	if err != nil {
+	// Check if the database connection is ready
+	if err := articlehandler.GetDatabase().Ping(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, "Application not ready")
+		fmt.Fprint(w, "Database not ready")
 		return
 	}
 

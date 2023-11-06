@@ -78,7 +78,7 @@ RUN set -x && apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get instal
     locale-gen en_US.UTF-8 
 
 # Create a group and user to ensure the process does not run as root
-RUN groupadd -r stack-io && useradd -r -g stack-io stack-io
+RUN groupadd -g 999 -r stack-io && useradd  -u 999 -r -g stack-io stack-io
 
 # Change the ownership of the /app directory to myuser
 RUN chown stack-io:stack-io /app

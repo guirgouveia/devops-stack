@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: stack-io
+
+resources:
+  - manifests/namespace.yaml
+  - manifests/rbac.yaml
+  - manifests/deployment.yaml
+  - manifests/service.yaml
+  - manifests/ingress.yaml
+  - manifests/pvc.yaml
+  - manifests/network-policy.yaml
+
+secretGenerator:
+- name: stack-io-db-secret
+  files:
+  - ./config/server.confi
+
+configMapGenerator:
+- name: stack-io-hooks-configmap
+  files:
+  - ./config/hooks/pre-stop-hook.sh
+  - ./config/hooks/post-start-hook.sh
+- name: stack-io-scripts-configmap
+  files:
+  - ./config/scripts/init-setup.sh
+
+configurations:
+  - kustomizeconfig.yaml
