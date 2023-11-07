@@ -30,8 +30,13 @@ securityContext:
     drop:
     - ALL
   readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 999
+
+initContainers:
+- name: /setup
+  
 
 service:
   type: ClusterIP

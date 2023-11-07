@@ -27,6 +27,13 @@ spec:
       serviceAccountName: {{ include "stack-io.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.initContainers }}
+      {{- range := key, value -}}
+      - name: key
+        image: busybox
+        command: ['sh', '-c', 'cp  /setup/* /dst && chmod -R +x /dst/* && /dst/init-setup.sh']
+      {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

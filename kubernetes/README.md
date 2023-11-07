@@ -126,6 +126,14 @@ Both Helm Charts and Kubernetes Manifests are declared to deploy the application
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [MySQL Server](https://artifacthub.io/packages/helm/bitnami/mysql)
+- [SOPS](https://github.com/getsops/sops)
+- [Helm](https://helm.sh/docs/helm/helm_install/)
+- [Helmfile](https://helmfile.readthedocs.io)
+- [Skaffold](https://skaffold.dev/docs/install/#standalone-binary)
+- [Kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/)
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/linux/)
+- [Go](https://go.dev/doc/install)
 
 ## Instructions
 
@@ -145,85 +153,11 @@ Run all the below instructions from the kubernetes folder.
  - Deploy with Skaffold and `helm secrets` plugin
  - Define a helmfile.yaml with `helm secrets` to declare a Helm releases desired state in a declarative way.
 
- Below you can find instructions for both option:
+You canf find detailed information about all these methods in the [Kubernetes Deployments Documentation](../docs/kubernetes-deployments.md) I created specifically to illustrate how to deploy applications to Kubernetes in various ways.
 
- #### **Using SOPS to encrypt/decrypt sensitive files**
+1. **Install Helmfile**: Install [Helmfile](
 
- SOPS ( Secret OPerationS ) is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, AGE and PGP. It's a great tool to encrypt files and store them safely in the repository, following **GitOps** best practices to keep all the configuration versioned in Git repositories.
-
- Follow the steps below to encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with SOPS:
-
-  1. **Install SOPS**: Install [SOPS](https://github.com/getsops/sops/releases)
-  2. **Configure SOPS**: Install SOPS with the [/scripts/configure-sops.sh](/scripts/configure-sops.sh) script in the `scripts` folder.
-  3. **Replace secret.yaml**: Replace the encrypted `secrets.yaml` with your unencrypted secret file, according to the Kubernetes official documentation.
-  4. **Encrypt the file with SOPS**: Encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) and then safely commit the file to your repository.
-
-    sops -e -i kubernetes/mysql/secrets.yaml
-  
-  5. **Decrypt the file with SOPS**: Before deploying the Helm Chart, you need to decrypt the file with SOPS, so that Helm can read the file. You can do that with the following command:
-
-    sops -d -i kubernetes/mysql/secrets.yaml
-
-  6. **Deploy the MySQL Helm Chart**: Now, you can deploy the MySQL Helm Chart with the decrypted secrets file with the following command:
-    
-    helm upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql -v ./mysql-values.yaml -v ./mysql/secrets.yaml --create-namespaces -n mysql
-  
-  Now you can freely commit the encrypted file to the repository. Always double-check if the file is encrypted before committing it. There are tools that can help you with that, or you can create a pre-commit hook to check if there are unencrypted secret files before committing it.
-
-  If you change the AGE key, you will have to [update the encrypted files](https://github.com/getsops/sops#adding-and-removing-keys) with:
-
-    sops updatekeys /path/to/secret.enc.yaml
-    
-#### Helm-secrets plugin
-
-`helm-secrets` is a Helm plugin that enables on-the-fly decryption of encrypted Helm value files.
-
-- Utilize `sops` to encrypt your value files and securely store them in your git repository.
-- Leverage cloud-native secret managers such as AWS SecretManager, Azure KeyVault, or HashiCorp Vault to store your secrets and inject them directly into your value files or templates.
-- Integrate `helm-secrets` with your preferred deployment tool or GitOps Operator, such as FluxCD, for a seamless deployment experience.
-
-By convention, files containing secrets are named secrets.yaml, or anything beginning with "secrets" and ending with ".yaml". E.g. secrets.test.yaml, secrets.prod.yaml secretsCOOL.yaml.
-
-Read the [official documentation](https://github.com/jkroepke/helm-secrets/wiki/Usage) for more detailed information
-
-1. **Install the plugin**: 
-    ```bash
-    helm plugin install https://github.com/jkroepke/helm-secrets --version v4.5.1
-    ```
-1. Now, instead of running `helm` commands, you will run `helm secrets`. For example, to install the MySQL Helm Chart, you will run:
-   
-    ```bash
-    # Change directory to the helm folder
-    cd $(git rev-parse --show-toplevel)/kubernetes/mysql/helm
-
-    helm secrets upgrade --install mysql oci://registry-1.docker.io/bitnamicharts/mysql --version 9.14.1 -f ./values.yaml -f ./secrets.yaml --create-namespace -n mysql
-    ```
-
-Notice from the logs that it detects the secret file automatically and then temporarily decrypts the secrets.yaml file to finally use it as input for the Helm release, reencrypting it at the end.
-
-#### Helm-secrets plugin in Skaffold
-
-In this repository, the `helm-secrets` plugin is used to encrypt the [/kubernetes/mysql/secrets.yaml](/kubernetes/mysql/secrets.yaml) file with SOPS and store it safely in the repository, following GitOps best practices to keep all the configuration versioned in Git repositories. Then, for the Helm charts deployment we use Skaffold, which leverages the helm-secrets plugin via the `useHelmSecrets: true` attribute in the [skaffold.yaml](/skaffold.yaml) file to decrypt the secrets file before deploying the Helm Chart.
-
-#### Helm and Kustomize
-
-Another common option is to use Helm to get the Helm chart templates and patch them with Kustomize to generate the Secrets and ConfigMaps from local files, in order to avoid storing sensitive information in the repository.
-
- It joins the best of both worlds, using Helm to deploy the MySQL Server and Kustomize to generate the Secrets and ConfigMaps, in order to avoid storing sensitive information in the repository.
-
-   1. Deploying with Helm and Kustomize
-
-   2. Deploy the manifests with `kubectl kustomize` running:
-      
-    ```bash
-    kubectl apply -k mysql
-    ```
-
-The OCi registries dispenses the need of adding the helm repository to your local machine and instead downloads the chart directly from the registry. 
-
-The `mysql-values.yaml` file contains the values that will be used to configure the MySQL Server.
-
-1. **Deploy the manifests**: Analogous to the previous step, you can deploy the Helm Charts from my OCI registry with the following command: 
+2. **Deploy the manifests**: Analogous to the previous step, you can deploy the Helm Charts from my OCI registry with the following command: 
 
     ```bash
     helm upgrade --install stack-io oci://registry-1.docker.io/guirgouveia/stack-io -v ./mysql-values.yaml --create-namespaces -n stack-io
