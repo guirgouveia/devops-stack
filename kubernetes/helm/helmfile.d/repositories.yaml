@@ -1,0 +1,8 @@
+repositories:
+  - name: bitnami
+    url: https://registry-1.docker.io/bitnamicharts
+    oci: true
+  - name: grgouveia
+    url: https://registry-1.docker.io/grgouveia
+    oci: true
+    verify: true

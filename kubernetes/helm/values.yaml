@@ -1,4 +1,4 @@
-architecture: standalone # Change this to "replication" for a replication architecture
+architecture: replication
 auth:
   createDatabase: true
 image:
@@ -6,7 +6,7 @@ image:
   repository: bitnami/mysql
   tag: 8.0.35-debian-11-r0
 metrics:
-  enabled: false
+  enabled: true
 initDbScripts: |-
   mysql-init.sh:
     #!/bin/bash

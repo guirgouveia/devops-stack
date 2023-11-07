@@ -9,13 +9,18 @@ helmCharts:
   namespace: mysql
   valuesFile: ./helm/values.yaml
   additionalValuesFiles:
-    - "./helm/secrets.yaml"
+    - "./secrets.yaml"
   includeCRDs: true
 
 configMapGenerator:
 - name: mysql-init-configmap
   files:
   - ./config/mysql-init.sh
+
+secretGenerator:
+- name: mysql-secret
+  envs:
+  - ./config/.env.secret
 
 configurations:
   - kustomizeconfig.yaml

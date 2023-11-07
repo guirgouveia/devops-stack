@@ -1,32 +1,3 @@
-helmDefaults:
-  kubeContext: docker-desktop
-  cleanupOnFail: true             
-  atomic: true
-  args: []
-  diffArgs: []
-  verify: true
-  wait: true
-  waitForJobs: true
-  timeout: 60
-  recreatePods: true
-  force: false
-  historyMax: 0 # no limit
-  createNamespace: true
-  devel: true
-  skipDeps: false
-  reuseValues: false
-  cascade: "background"
-  insecureSkipTLSVerify: false
-
-
-releases:
-- name: mysql-db
-  namespace: mysql
-  version: 9.14.1
-  chart:  oci://registry-1.docker.io/bitnamicharts/mysql
-  values:
-  - ../mysql//values.yaml
-  # Uses helm secrets plugin to decrypt the secret
-  secrets: 
-  - ../mysql/secrets.yaml
-  missingFileHandler: Error
+environments:
+  development:
+  production:

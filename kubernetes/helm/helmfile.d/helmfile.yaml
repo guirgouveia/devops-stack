@@ -1,15 +1,8 @@
-repositories:
-  - name: bitnami
-    url: https://registry-1.docker.io/bitnamicharts
-    oci: true
-  - name: grgouveia
-    url: https://registry-1.docker.io/grgouveia
-    oci: true
-    verify: true
-
 # Default values for all releases
 bases:
   - ./environments.yaml
+  - ./defaults.yaml
+  - ./repositories.yaml
     
 commonLabels:
   kubernetes.io/managed-by: helmfile
@@ -17,10 +10,10 @@ commonLabels:
 releases:
 - name: stack-io
   namespace: stack-io
-  chart: ./stack-io/helm/stack-io
+  chart: ../stack-io/helmcharts/
   values:
-  - ./stack-io/helm/values.yaml
+  - ../stack-io/values.yaml
   # Uses helm secrets plugin to decrypt the secret
   secrets:
-  - ./stack-io/helm/secrets.yaml
+  - ../stack-io/secrets.enc.yaml
   missingFileHandler: Error
