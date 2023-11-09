@@ -20,6 +20,8 @@ services:
       - "$WEBSERVER_HOST_PORT:8080" # Expose port 8081 to the host to avoid port conflicts
     depends_on:
       - mysql
+    volumes:
+      - stack_io_logs:/var/log/webserver
     
   mysql:
     container_name: stack-io-mysql
@@ -46,6 +48,9 @@ services:
       - "$ADMINER_HOST_PORT:8080" # Expose port 8082 to the host to avoid port conflicts
 
 volumes:
+  stack_io_logs:
+    driver: local
+    name: stack-io-logs
   mysql_data:
     driver: local
     name: stack-io-mysql-data

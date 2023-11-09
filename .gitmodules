@@ -1,0 +1,3 @@
+[submodule "go-vuejs-microservices"]
+	path = go-vuejs-microservices
+	url = git@github.com:guirgouveia/go-vuejs-microservices.git

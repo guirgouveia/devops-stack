@@ -83,9 +83,11 @@ RUN addgroup --gid 999 stack-io
 # Create a new user "stack-io" with UID 999 and add it to the newly created "stack-io" group
 RUN adduser --uid 999 --ingroup stack-io --shell /bin/bash --disabled-password --gecos "" stack-io
 
+# Creates the logs folder
+RUN mkdir -p /var/logs/webserver
 
-# Change the ownership of the /app directory to myuser
-RUN chown stack-io:stack-io /app
+# Change the ownership of the /app directory to stack-io
+RUN chown -R stack-io:stack-io /app /var/logs/webserver
 
 # Switch to the new user
 USER stack-io
