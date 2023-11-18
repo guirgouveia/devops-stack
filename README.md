@@ -4,23 +4,23 @@ Welcome to my personal project repository, where my journey with the company Sta
 
 The idea is to show as many options from the latest DevOps trends as possible for developing and continuously build and deploy a Golang webserver, from local to cloud deployment in a Kubernetes Cluster, with a strong focus on automation, security, scalability, reliability and future-proofing. 
 
-The project is designed for extensibility, encouraging forks and contributions, and laying down a solid foundation for others to build upon.
-
-**Note:** The project is still under development, with some features yet to be released publicly.
-
 ## Project Overview
 
 What started as a Dockerized Golang Webserver and Vue.js Frontend Assignment from the company Stack.io for a Senior DevOps Engineer position, has now become the epitome of a modern DevOps workflow, emphasizing the best standards of Cloud Infrastructure with Terraform and extensive documentation to guide you at every step.
 
-### Current State
+## Techonologies
 
-This repository is a trove of real-world DevOps tools and implementations:
-
-- **Local to Cloud Deployment**: Leveraging Docker, Docker Compose, and Kubernetes for versatile deployments.
-- **Continuous Development**: Utilizing Skaffold, GitHub Actions and FluxCD for a seamless GitOps-driven pipeline from development to production.
-- **Advanced Operations**: Incorporating Istio Service Mesh and Flagger for robust security and reliable canary deployments.
-- **Monitoring & Reliability**: Integrating Prometheus and Grafana for insightful monitoring, complemented by Linkerd for logging.
-
+- **Infrastructure as Code (IaC)**: Terraform
+- **CI/CD**: Github Actions
+- **Cloud Platforms**: AWS and Azure
+- **Container Orchestration**: Docker Desktop, minikube, AKS and EKS
+- **Solution Architecture**: AWS Well-Architected Framework
+- **Golang microservices**
+- **Frontend Development with Vue.js**
+- **Monitoring**: Prometheus and Grafana**
+- **GitOps**: FluxCD, Terraform
+- **DevSecOps**: Trivy & Checkov
+  
 ### Security Focus
 
 A core aspect of this project is its strong emphasis on security:
@@ -28,31 +28,25 @@ A core aspect of this project is its strong emphasis on security:
 - **DevSecOps Tools Integration**: Embedding tools that preempt vulnerabilities and misconfigurations.
 - **Secure Secrets Management**: Ensuring all secrets are encrypted and version-controlled in alignment with GitOps principles.
 
-### Future-Proofing
-
-The project is designed for extensibility, encouraging forks and contributions, and laying down a solid foundation for others to build upon.
-
-## Skills & Tools Utilized
-
-- Infrastructure as Code (IaC)
-- CI/CD
-- Cloud Infrastructure
-- Container Orchestration
-- Solution Architecture
-- Programming with Go
-- Frontend Development with Vue.js
-- Monitoring with Prometheus and Grafana
-- Cloud Platforms: Microsoft Azure, AWS
-- Container & Orchestration: Docker, Kubernetes, Istio
-- GitOps & DevSecOps: FluxCD, Terraform
-
 This repository is not just a reflection of my professional skills but also a growing resource for DevOps enthusiasts and professionals alike. Dive into the code, explore the pipelines, and witness DevOps theory in action.
 
-Feel free to fork, star, and contribute to this project. Let's build something amazing together!
+> **Note:** The project is still under development, with some features yet to be released publicly.
+>
+>The project is designed for extensibility, encouraging forks and contributions, and laying down a solid foundation for others to build upon.
+>
+>Feel free to fork, star, and contribute to this project. Let's build something amazing together!
+>
+>You can find the full list of features to be implemented at [RoadMap](./docs/roadmap.md).
 
 ## Introduction
 
-This project serves as a practical illustration of deploying a Golang webserver to a Kubernetes cluster, encapsulating the complete lifecycle from development to deployment. At its core, it employs a Dockerfile to containerize the Go application, orchestrates the deployment via Kubernetes, and leverages Terraform for provisioning the required infrastructure on AWS. The use of extensive shell scripting throughout the process not only automates routine tasks but also ensures consistency and efficiency in the build and deployment phases. This approach highlights best practices in Infrastructure as Code (IaC), containerization, and orchestration, providing a robust blueprint for seamless integration and continuous delivery in cloud-native environments.
+This project serves as a practical illustration of deploying a [Golang cloud-native application](./go-vuejs-microservices) to a Kubernetes cluster, encapsulating the complete lifecycle from development to deployment, while shifting security left, incorporating security tools in the development lifecycle since the beginning. 
+
+At its core, it employs a Dockerfile to containerize the Go application, orchestrates the deployment via Kubernetes, and leverages Terraform for provisioning the required infrastructure on AWS. 
+
+The use of extensive shell scripting throughout the process not only automates routine tasks but also ensures consistency and efficiency in the build and deployment phases. 
+
+This approach highlights best practices in Infrastructure as Code (IaC), containerization, and orchestration, providing a robust blueprint for seamless integration and continuous delivery in cloud-native environments. 
 
 ## MySQL Server
 
